@@ -1,0 +1,37 @@
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run diagnostic tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build APK with Buildozer
+        uses: ArtemSBulba/setup-buildozer@v1
+        with:
+          python-version: "3.11"
+
+      - name: Build debug APK
+        run: buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-debugging-tutor-apk
+          path: bin/*.apk
+          if-no-files-found: error
